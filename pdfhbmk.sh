@@ -81,7 +81,13 @@ j=$SPLIT_OFFSET
 PAGES_LIST=""
 
 while [ $i -lt $SPLIT_OFFSET ]; do
-	PAGES_LIST="$PAGES_LIST page_$i.pdf page_$j.pdf"
+	
+	if [ $(($PAGES%2)) != 0 ] && [ $i == $(($SPLIT_OFFSET - 1)) ]; then
+		PAGES_LIST="$PAGES_LIST page_$i.pdf" 
+	else
+		PAGES_LIST="$PAGES_LIST page_$i.pdf page_$j.pdf"
+	fi
+
 	i=$(($i+1))
 	j=$(($j+1))
 
