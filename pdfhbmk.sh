@@ -23,26 +23,25 @@
 
 #////////////////////////////////////////////////////////////////////////
 
-
 #First argument is the pdf file to compute
 FILE="$1"
 
-#Check if FILE exists and  is a PDF file 
+#Check if FILE exists and  is a PDF file
 echo
 echo "Verifying document..."
 
 if [ -f "./$FILE" ]; then
 
-	FILE_TYPE=`file -b "$FILE" | grep -i pdf -o`
+	FILE_TYPE=$(file -b "$FILE" | grep -i pdf -o)
 
 	if [ "$FILE_TYPE" != "PDF" ]; then
 		echo "FATAL ERROR: Need a valid PDF file"
-		exit 1 
+		exit 1
 	fi
 
 else
 	echo "FATAL ERROR: $FILE does not exist"
-	exit 1 
+	exit 1
 fi
 
 echo "Document verification [OK]"
@@ -51,7 +50,7 @@ ID=$RANDOM
 mkdir "tmp_pdfhbmk_$ID"
 cd "tmp_pdfhbmk_$ID"
 
-#extract FILE pages 
+#extract FILE pages
 echo
 echo "Splitting pages..."
 
@@ -60,19 +59,19 @@ pdfseparate "../$FILE" 'page_%d.pdf'
 #### Generate printable handbook
 
 #get number of pages in pdf document
-PAGES=`pdfinfo "../$FILE" | grep '^[pP]ages' | cut -d ":" -f 2 | sed 's/ //g'`
+PAGES=$(pdfinfo "../$FILE" | grep '^[pP]ages' | cut -d ":" -f 2 | sed 's/ //g')
 
 #compute offset
-if [ $(($PAGES%2)) == 0 ]; then
+if [ $(($PAGES % 2)) == 0 ]; then
 
-	SPLIT_OFFSET=$((($PAGES/2)+1))
+	SPLIT_OFFSET=$((($PAGES / 2) + 1))
 
 else
 
-	SPLIT_OFFSET=$((($PAGES/2)+2))
+	SPLIT_OFFSET=$((($PAGES / 2) + 2))
 fi
 
-#join pages 
+#join pages
 echo
 echo "Joining pages..."
 
@@ -81,15 +80,15 @@ j=$SPLIT_OFFSET
 PAGES_LIST=""
 
 while [ $i -lt $SPLIT_OFFSET ]; do
-	
-	if [ $(($PAGES%2)) != 0 ] && [ $i == $(($SPLIT_OFFSET - 1)) ]; then
-		PAGES_LIST="$PAGES_LIST page_$i.pdf" 
+
+	if [ $(($PAGES % 2)) != 0 ] && [ $i == $(($SPLIT_OFFSET - 1)) ]; then
+		PAGES_LIST="$PAGES_LIST page_$i.pdf"
 	else
 		PAGES_LIST="$PAGES_LIST page_$i.pdf page_$j.pdf"
 	fi
 
-	i=$(($i+1))
-	j=$(($j+1))
+	i=$(($i + 1))
+	j=$(($j + 1))
 
 done
 
@@ -103,8 +102,8 @@ rm -rf "tmp_pdfhbmk_$ID"
 echo
 echo "Generating 2x1 pages document..."
 
-pdfnup --landscape --nup 2x1 "handbook_tmp.pdf"
-mv "handbook_tmp-nup.pdf" "handbook_$FILE"
+pdfjam --landscape --nup 2x1 "handbook_tmp.pdf"
+mv "handbook_tmp-pdfjam.pdf" "handbook_$FILE"
 rm "handbook_tmp.pdf"
 
 echo
